@@ -156,6 +156,8 @@ NSString *const kGPUImagePassthroughFragmentShaderString = SHADER_STRING
 
 - (void)dealloc
 {
+    firstInputFramebuffer = nil;
+    
 #if !OS_OBJECT_USE_OBJC
     if (imageCaptureSemaphore != NULL)
     {
