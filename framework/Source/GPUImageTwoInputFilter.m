@@ -214,7 +214,7 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
         return;
     }
     
-    BOOL haveNeededFrames = NO;
+    BOOL updatedMovieFrameOppositeStillImage = NO;
     
     if (textureIndex == 0)
     {
@@ -225,10 +225,12 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
             hasReceivedSecondFrame = YES;
         }
         
-        // If second frame is indefinite, we are ready to proceed, either it is also a still image or a movie, either is fine
-        if CMTIME_IS_INDEFINITE(secondFrameTime)
+        if (!CMTIME_IS_INDEFINITE(frameTime))
         {
-            haveNeededFrames = YES;
+            if CMTIME_IS_INDEFINITE(secondFrameTime)
+            {
+                updatedMovieFrameOppositeStillImage = YES;
+            }
         }
     }
     else
@@ -239,16 +241,18 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
         {
             hasReceivedFirstFrame = YES;
         }
-        
-        // If first frame is indefinite, we are ready to proceed, either it is also a still image or a movie, either is fine
-        if CMTIME_IS_INDEFINITE(firstFrameTime)
+
+        if (!CMTIME_IS_INDEFINITE(frameTime))
         {
-            haveNeededFrames = YES;
+            if CMTIME_IS_INDEFINITE(firstFrameTime)
+            {
+                updatedMovieFrameOppositeStillImage = YES;
+            }
         }
     }
-    
-    // Ready to proceed as long as we frames on both inputs or just on one input as long as the other input is static
-    if ((hasReceivedFirstFrame && hasReceivedSecondFrame) || haveNeededFrames)
+
+    // || (hasReceivedFirstFrame && secondFrameCheckDisabled) || (hasReceivedSecondFrame && firstFrameCheckDisabled)
+    if ((hasReceivedFirstFrame && hasReceivedSecondFrame) || updatedMovieFrameOppositeStillImage)
     {
         CMTime passOnFrameTime = (!CMTIME_IS_INDEFINITE(firstFrameTime)) ? firstFrameTime : secondFrameTime;
         [super newFrameReadyAtTime:passOnFrameTime atIndex:0]; // Bugfix when trying to record: always use time from first input (unless indefinite, in which case use the second input)
