@@ -8,7 +8,9 @@ Pod::Spec.new do |s|
   s.source   = { :git => 'https://github.com/BradLarson/GPUImage.git', :tag => "#{s.version}" }
   
   s.source_files = 'framework/Source/**/*.{h,m}'
-  s.resource_bundles = 'framework/Resources/*.png'
+  s.resource_bundles = {
+    'GPUImage' => 'framework/Resources/*.png'
+  }
   s.requires_arc = true
   s.xcconfig = { 'CLANG_MODULES_AUTOLINK' => 'YES' }
   
